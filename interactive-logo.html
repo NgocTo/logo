@@ -1,0 +1,234 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>ZIM Interactive Logo</title>
+
+<!-- Welcome to ZIM at https://zimjs.com - Code Creativity!              	        -->
+<!-- ZIM runs on the HTML Canvas powered by JavaScript and CreateJS https://createjs.com -->
+<!-- Founded by Inventor Dan Zen - http://danzen.com - Canadian New Media Award Winner 	-->
+<!-- ZIM is free to use. You can donate to help improve ZIM at http://zimjs.com/donate 	-->
+<link href="https://fonts.googleapis.com/css?family=Inconsolata" rel="stylesheet">
+<script src="https://d309knd7es5f10.cloudfront.net/createjs_1.1_min.js"></script>
+<script src="https://d309knd7es5f10.cloudfront.net/zim_9.js"></script>
+<!-- use zimjs.com/distill for minified individual functions! -->
+
+<script>
+
+// SCALING OPTIONS
+// scaling can have values as follows with full being the default
+// "fit"	sets canvas and stage to dimensions and scales to fit inside window size
+// "outside"	sets canvas and stage to dimensions and scales to fit outside window size
+// "full"	sets stage to window size with no scaling
+// "tagID"	add canvas to HTML tag of ID - set to dimensions if provided - no scaling
+
+var scaling = "fit"; // this will resize to fit inside the screen dimensions
+var width = 1024;
+var height = 400;
+var color = light; // ZIM colors like green, blue, pink, faint, clear, etc. available globally
+var outerColor = dark; // any HTML colors like "violet", "#333", etc. fine to use
+
+var frame = new Frame(scaling, width, height, color, outerColor);
+frame.on("ready", function() {
+    zog("ready from ZIM Frame"); // logs in console (F12 - choose console)
+
+    var stage = frame.stage;
+    var stageW = frame.width;
+    var stageH = frame.height;
+
+    // see http://zimjs.com/learn.html for video and code tutorials
+    // see http://zimjs.com/docs.html for documentation
+    // see http://zimjs.com/bits.html for 64 Interactive Media techniques
+
+    var background = new Rectangle(stageW, stageH, light).addTo();
+    var value = "";
+    var textArea = new TextArea({
+        width: 500,
+        height: 170,
+        size: 150,
+        color: moon,
+        spellCheck: false
+    });
+
+    // add logo
+    extend(Logo, zim.Container);
+    var logo = new Logo().centerReg();
+
+    // add hint
+    var label = new Label({
+            text: "?",
+            size: 25,
+            color: moon,
+            rollColor: purple,
+            font: "Inconsolata"
+        })
+    var hint = new Button({
+        width: 50,
+        height: 50,
+        label:label,
+        backgroundColor: dark,
+        rollBackgroundColor: yellow,
+        corner: 10
+    })
+    hint.on("click", function() {
+        new Pane({
+            width:320,
+            height:50,
+            label: new Label({
+                text: "What is my name?",
+                font: "Inconsolata",
+                size:30
+            }),
+            backgroundColor: moon,
+            corner: 10
+        }).show().mov(null,150);
+    })
+
+
+    // add emitter
+    var explosion = new Emitter({
+        obj:[new Rectangle(10,10), new Circle(10)],
+        life: 2000,
+        num:9,
+        force:6,
+        random: {
+            rotation: {min:0, max:360},
+            color: [orange, yellow, red, brown],
+            regX: {min:-50, max:50},
+            regY: {min:-50, max:50}
+        },
+        startPaused:true
+    }).centerReg();
+
+    // logo mouseover event
+    logo.on("rollover", function() {
+        // remove logo parts
+        logo.children[2].alpha = 0;
+        logo.children[3].alpha = 0;
+        logo.children[4].alpha = 0;
+
+        // change logo properties
+        logo.color = red;
+        logo.children["0"].graphics._fill.style = moon;
+        logo.children["1"].graphics._fill.style = moon;
+        logo.expand();
+        // change background color
+        background.animate({
+            props: {color: darker},
+            time: 200
+        });
+
+        // set textArea properties
+        textArea.center();
+        textArea.removeChild(textArea.background);
+        textArea.setFocus(true);
+        textArea.tag.style.fontFamily = "Inconsolata";
+        textArea.tag.style.textAlign = "center";
+        textArea.tag.maxLength = 4;
+
+        // add hint to stage
+        hint.pos(30, 30, true, true);
+    })
+
+    textArea.on("input", function() {
+        value = textArea.text;
+        loop(value.length, function(i) {
+            if (i === 0) {
+                logo.children["0"].x = 25;
+                logo.children["1"].x = logo.width - 25;
+            } else {
+                logo.children["0"].x = -25*i;
+                logo.children["1"].x = logo.width + 25*i;
+            }
+        })
+
+        if ((value.toLowerCase() == "ngoc") || (value.toLowerCase() == "jade")) {
+            explode();
+            value = "";
+            stage.update();
+        }
+
+        stage.update();
+    });
+
+    /* FUNCTIONS */
+
+    function explode() {
+        explosion.x = logo.x;
+        explosion.y = logo.y;
+        explosion.spurt({
+            time:500
+        });
+    }
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+	// VECTOR CONTAINER TEMPLATE
+	function Logo(color) {
+		if (zot(color)) color = "red";
+		this.super_constructor(214,214); // WIDTH AND HEIGHT ADDED (step 8)
+		var cjs = createjs;
+
+		// VECTOR CONTAINER INSTRUCTIONS
+		// This class adds the Adobe Animate export shapes to a ZIM Container
+		// 1. Start the Adobe Animate file as a canvas file
+		// 2. Use one frame, but multiple layers are okay (for multiple frames see ZIM/CreateJS MovieClip)
+		// 3. Position the drawing on the Animate stage in the top left corner for best results
+		// 4. Save the file before publishing and then publish the file (not export)
+		// 5. Look part way down the JS file for where it says STAGE CONTENT: and copy the Layers
+		// 6. Paste the Layers here and COMMENT out the this.timeline lines
+		// 7. Add a this.addChild() under the code you copied and add your layers in reverse order
+		// 8. Add to the super_constructor the width and height from the nominalBounds found below the layers
+		// eg: p.nominalBounds = new cjs.Rectangle(271,196,180,180);  the width and height are 180,180
+		// so add width and height to this.super_constructor(180,180) at top
+		// 9. Use new VectorContainer() to make your shape - you can store it in a variable, chain to it, etc.
+		// 10. You can pass in parameters to handle custom colors, etc.
+
+		// COPIED FROM ADOBE ANIMATE EXPORTED JS FILE (step 6) - this is an example from http://zimjs.com/code/vectorcontainer/bug.js
+
+        // Layer_2
+        this.shape = new cjs.Shape();
+        this.shape.graphics.f("#602020").s().p("EAZUAyjMg0hhWzQgIgOAAgPIAAtRQAAg1AzgOQA0gOAbAtMA0hBWyQAIAPAAAPIAANRQAAA1gzAOQgMAEgLAAQgjAAgVgjg");
+        this.shape.setTransform(107,107,0.297,0.297);
+
+        this.shape_1 = new cjs.Shape();
+        this.shape_1.graphics.f("#602020").s().p("EgDgAqMMAAAhUXIHBAAMAAABUXg");
+        this.shape_1.setTransform(177.9,107,0.297,0.297,0,0,0,0.1,0.1);
+
+        this.shape_2 = new cjs.Shape();
+        this.shape_2.graphics.f("#602020").s().p("EgDgAqMMAAAhUXIHBAAMAAABUXg");
+        this.shape_2.setTransform(36.2,107,0.297,0.297,0,0,0,0.2,0.1);
+
+        // this.timeline.addTween(cjs.Tween.get({}).to({state:[{t:this.shape_2},{t:this.shape_1},{t:this.shape}]}).wait(1));
+
+        // Layer 1
+        this.shape_3 = new cjs.Shape();
+        this.shape_3.graphics.f("#602020").s().p("EgNRA4QIAAruIPnAAMAAAhZDIvnAAIAAruIajAAMAAABwfg");
+        this.shape_3.setTransform(188.8,107,0.297,0.297,0,0,0,0.1,0.1);
+
+        this.shape_4 = new cjs.Shape();
+        this.shape_4.graphics.f("#602020").s().p("EgNRA4QMAAAhwfIajAAIAALuIvnAAMAAABZDIPnAAIAALug");
+        this.shape_4.setTransform(25.3,107,0.297,0.297);
+
+        // this.timeline.addTween(cjs.Tween.get({}).to({state:[{t:this.shape_4},{t:this.shape_3}]}).wait(1));
+
+        this.addChild(this.shape_4, this.shape_3, this.shape_2, this.shape_1, this.shape);
+
+		// LEAVE THIS - unless you want to interact individually with the shapes inside
+		this.mouseChildren = false;
+	}
+	// END VECTOR CONTAINER TEMPLATE
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    stage.update(); // this is needed to show any changes
+
+}); // end of ready
+
+</script>
+
+<meta name="viewport" content="width=device-width, user-scalable=no" />
+
+</head>
+
+<body>
+<!-- canvas with id="myCanvas" is made by zim Frame -->
+</body>
+</html>
